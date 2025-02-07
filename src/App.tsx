@@ -1,47 +1,38 @@
-import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
-import { useAuthenticator } from '@aws-amplify/ui-react';
 
-const client = generateClient<Schema>();
+import "@aws-amplify/ui-react/styles.css";
+import { Authenticator } from '@aws-amplify/ui-react';
+import { StorageBrowser } from '../components/StorageBrowser';
 
 function App() {
-  const { signOut } = useAuthenticator();
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
-
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
-
-    
-  function deleteTodo(id: string) {
-    client.models.Todo.delete({ id })
-  }
 
   return (
-    <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li onClick={() => deleteTodo(todo.id)} key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
-      </div>
-      <button onClick={signOut}>Sign out</button>
-    </main>
+    <Authenticator 
+      hideSignUp
+      components={{
+        Header() {
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ margin: '10px 0' }}>Welcome to S3 Bucket files</h2>
+            </div>
+          );
+        },
+      }}
+    >
+    
+      {({ signOut, user }) => (
+        <main>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{ margin: '10px 0' }}>Welcome to S3 Bucket files</h2>
+            </div>
+            <h1>Hello {user?.signInDetails?.loginId}</h1>
+            <button onClick={signOut}>Sign out</button>
+            
+          {/* StorageBrowser Component */}
+          <h2>Your Files</h2>
+          <StorageBrowser />
+        </main>
+      )}
+    </Authenticator>
   );
 }
 
