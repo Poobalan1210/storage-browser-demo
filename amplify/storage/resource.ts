@@ -2,10 +2,17 @@ import { defineStorage } from '@aws-amplify/backend';
 
 export const storage = defineStorage({
   name: 'test-transfer-webapps-s3-bucket',
-  access: allow => ({
-    'Images/*': [
-      allow.guest.to(['get']),
+  access: (allow) => ({
+    'public/*': [
+      allow.guest.to(['read']),
       allow.authenticated.to(['read', 'write', 'delete']),
+    ],
+    'protected/{entity_id}/*': [
+      allow.authenticated.to(['read']),
+      allow.entity('identity').to(['read', 'write', 'delete'])
+    ],
+    'private/{entity_id}/*': [
+      allow.entity('identity').to(['read', 'write', 'delete'])
     ]
   })
 });
